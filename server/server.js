@@ -4,6 +4,17 @@ const app = express();
 const Users = require('./model/user.js')
 
 
+app.use(function (req, res, next) {
+    res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "X-Requested-With,content-type"
+    );
+    res.setHeader("Access-Control-Allow-Credentials", true);
+    next();
+  });
+
 
 app.use(express.json());
 
@@ -28,10 +39,12 @@ app.get('/api/users', async(req,res) => {
 })
 
 app.post('/api/users', async(req,res) => {
+    
+
     const existingUser = await Users.find({ name : req.body.name}) // find-on belul megadjuk hogy milyen parameter alapjan akarjuk keresni
-    if(existingUser){ //ha mar van ilyen nevu user, akkor kiirja console-ba h ilyen mar letezik,
+    if(existingUser.length > 0){ //ha mar van ilyen nevu user, akkor kiirja console-ba h ilyen mar letezik,
         console.log("User already exists")
-        return res.json({ message : "anyád"}) //express ko9vetelmeny hogy legyen response
+        return res.json({ message : "anyád"}) //express kovetelmeny hogy legyen response
     }
     try{    
         const newUser = new Users({
@@ -52,6 +65,21 @@ app.post('/api/users', async(req,res) => {
     }
 } )
 
+app.delete('/api/users/:id', async(req,res) =>{
+    try{
+        const DeleteUser = await Users.findByIdAndDelete(req.params.id)//delete-nel a params az url-bol kapja a dolgokatXD
+        if(!DeleteUser){
+            return res.status(404).json({message : "User not found"})//res mindig az utolso!!!!!!!!
+        }
+        res.json({message : "User deleted"})
+    }
+
+    catch (error){
+        console.log(error)
+        res.status(500).json({message : "Server Error"})
+    }
+
+})
 
 
 
@@ -62,4 +90,4 @@ app.post('/api/users', async(req,res) => {
 
 
 mongoose.connect('mongodb+srv://greenhomeklima:Reingl01@cluster0.3fxpmf1.mongodb.net/test')
-app.listen(3000,() =>console.log("App is listening on port 3000"))
+app.listen(5000,() =>console.log("App is listening on port 5000"))

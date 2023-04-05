@@ -7,7 +7,7 @@ const UserSchema = new Schema({
         require : true
     },
     age : {
-        type : String,
+        type : Number,
         require : true
     },
     email : {
