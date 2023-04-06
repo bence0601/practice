@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const app = express();
 const Users = require('./model/user.js')
 
+const bcrypt = require('bcryptjs');
 
 app.use(function (req, res, next) {
     res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
@@ -49,6 +50,7 @@ app.post('/api/users', async(req,res) => {
     try{    
         const newUser = new Users({
             name : req.body.name,
+            password : req.body.password,
             age : req.body.age,
             email : req.body.email,
             phone : req.body.phone,
@@ -80,6 +82,26 @@ app.delete('/api/users/:id', async(req,res) =>{
     }
 
 })
+
+app.post('/login', async(req,res) => {
+    const {name,password} = req.body
+    try{
+        const user = await Users.findOne({name})
+        if(!user){
+            return res.status(400).json({message : "User not found"})
+        }
+        const isMatch =  bcrypt.compare(password, user.password)
+        if(!isMatch){
+            return res.status(400).json({message : "User not found"})
+        }
+        res.json({message : "Logged in successfully"})
+    }
+    catch (error){
+        console.log(error)
+        res.status(500).json({message : "Server Error"})
+    }
+})
+
 
 
 
